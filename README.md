@@ -2,9 +2,6 @@
 
 Proof of concept for a simple version of jest expect.
 
-This is a proving ground for testing/expect, which will be added as a standard
-module to Deno.
-
 ## Difference of jest expect
 
 Matchers and modifiers in the jest context are a growing number of methods.
