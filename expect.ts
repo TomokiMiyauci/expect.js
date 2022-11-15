@@ -52,25 +52,25 @@ export const expect: Expect = function (actual) {
     return run(actual, { hooks: applyHooks, matcher });
   }
 
-  for (const pp in matchers) {
-    type P = keyof Matchers;
-    const a = new Proxy(matchers[pp as P], { apply });
+  for (const property in matchers) {
+    type Prop = keyof Matchers;
+    const proxy = new Proxy(matchers[property as Prop], { apply });
 
-    matchers[pp as P] = a;
+    matchers[property as Prop] = proxy;
   }
 
-  for (const pp in hooks) {
-    type P = keyof typeof hooks;
+  for (const property in hooks) {
+    type Prop = keyof typeof hooks;
 
-    const proxy = new Proxy(hooks[pp as P], {
-      get: (hook, p) => {
+    const proxy = new Proxy(hooks[property as Prop], {
+      get: (hook, prop) => {
         applyHooks.push(hook);
 
-        return matchers[p];
+        return matchers[prop];
       },
     });
 
-    hooks[pp as P] = proxy;
+    hooks[property as Prop] = proxy;
   }
 
   return { ...matchers, ...hooks };
@@ -129,8 +129,8 @@ function run(
     }).then(match).then(applyResultHook).then(throwOrThrough);
   }
 
-  const result = match(actual);
-  const r = applyResultHook(result);
+  const matchResult = match(actual);
+  const result = applyResultHook(matchResult);
 
-  throwOrThrough(r);
+  throwOrThrough(result);
 }
