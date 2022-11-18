@@ -1,28 +1,13 @@
 import type {
-  Context,
   Hook,
+  Matcher,
+  Matchers,
   MatchResult,
   OnActual,
   OnResult,
 } from "./types.ts";
-import { toBe, toBeNull, toBeUndefined } from "./matchers.ts";
 import { not, rejects, resolves } from "./hooks.ts";
-
-interface Matcher {
-  (this: Expect, ...args: any[]): unknown;
-}
-
-interface ExpectConstructor {
-  (actual: unknown): {
-    toBe: Matcher;
-  };
-}
-
-interface Matchers {
-  toBe: (expected: unknown) => MatchResult;
-  toBeUndefined: () => MatchResult;
-  toBeNull: () => MatchResult;
-}
+import { Voidify } from "./utils.ts";
 
 interface Hooks {
   not: Matchers;
@@ -32,56 +17,53 @@ interface Hooks {
   rejects: Matchers;
 }
 
-interface Expect {
-  (actual: unknown): Matchers & Hooks;
-}
-
-const matchers: Matchers = { toBe, toBeUndefined, toBeNull };
 const hooks = { not, resolves, rejects };
 
-export const expect: Expect = function (actual) {
-  const applyHooks: Hook[] = [];
+export function createExpect<M extends Matchers>(matchers: M) {
+  return (actual: unknown): { [k in keyof M]: Voidify<M[k]> } => {
+    const applyHooks: Hook[] = [];
 
-  function apply(
-    fn: (this: Context, ...args: unknown[]) => MatchResult,
-    _: unknown,
-    args: unknown[],
-  ) {
-    const matcher = { fn, args };
+    function apply(
+      fn: Matcher,
+      _: unknown,
+      args: unknown[],
+    ) {
+      const matcher = { fn, args };
 
-    return run(actual, { hooks: applyHooks, matcher });
-  }
+      return run(actual, { hooks: applyHooks, matcher });
+    }
 
-  for (const property in matchers) {
-    type Prop = keyof Matchers;
-    const proxy = new Proxy(matchers[property as Prop], { apply });
+    for (const property in matchers) {
+      type Prop = keyof M;
+      const proxy = new Proxy(matchers[property as Prop], { apply });
 
-    matchers[property as Prop] = proxy;
-  }
+      matchers[property as Prop] = proxy;
+    }
 
-  for (const property in hooks) {
-    type Prop = keyof typeof hooks;
+    for (const property in hooks) {
+      type Prop = keyof typeof hooks;
 
-    const proxy = new Proxy(hooks[property as Prop], {
-      get: (hook, prop) => {
-        applyHooks.push(hook);
+      const proxy = new Proxy(hooks[property as Prop], {
+        get: (hook, prop) => {
+          applyHooks.push(hook);
 
-        return matchers[prop];
-      },
-    });
+          return matchers[prop];
+        },
+      });
 
-    hooks[property as Prop] = proxy;
-  }
+      hooks[property as Prop] = proxy;
+    }
 
-  return { ...matchers, ...hooks };
-};
+    return { ...matchers, ...hooks };
+  };
+}
 
 function run(
   actual: unknown,
   context: {
     hooks: Hook[];
     matcher: {
-      fn: (this: Context, ...args: unknown[]) => MatchResult;
+      fn: Matcher;
       args: Iterable<unknown>;
     };
   },
