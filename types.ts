@@ -24,6 +24,7 @@ export interface MatchResult {
   readonly pass: boolean;
 }
 
+/** Expect runtime context. */
 export interface Context {
   /** Actual value. */
   readonly actual: unknown;
@@ -37,11 +38,15 @@ export interface Match {
 }
 
 export interface Hook {
+  /** The hook name. */
   name: string;
 
+  /** Whether the hook should be await or not. */
   await: boolean;
 
+  /** Call on before matcher matching. */
   onActual?: OnActual;
 
+  /** Call on after matcher matching. */
   onResult?: OnResult;
 }
