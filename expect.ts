@@ -9,14 +9,6 @@ import type {
 import { not, rejects, resolves } from "./hooks.ts";
 import { Voidify } from "./utils.ts";
 
-interface Hooks {
-  not: Matchers;
-
-  resolves: Matchers;
-
-  rejects: Matchers;
-}
-
 const hooks = { not, resolves, rejects };
 
 export function createExpect<M extends Matchers>(matchers: M) {
