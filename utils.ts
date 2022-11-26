@@ -4,3 +4,7 @@ export type IsPromise<T> = T extends Promise<unknown> ? true : false;
 export type Voidify<T> = T extends (...args: infer Args) => infer R
   ? (...args: Args) => IsPromise<R> extends true ? Promise<void> : void
   : T;
+
+export function inspect(input: unknown): string {
+  return Deno.inspect(input);
+}

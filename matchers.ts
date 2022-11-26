@@ -1,9 +1,10 @@
 import type { Context, MatchResult } from "./types.ts";
+import { inspect } from "./utils.ts";
 
 export function toBeUndefined(this: Context): MatchResult {
   return {
     pass: this.actual === undefined,
-    message: `expected undefined, actual ${Deno.inspect(this.actual)}`,
+    message: `expected undefined, actual ${inspect(this.actual)}`,
   };
 }
 
@@ -12,7 +13,7 @@ export function toBe(this: Context, expected: unknown): MatchResult {
 
   return {
     pass,
-    message: `expected ${Deno.inspect(expected)}, actual ${this.actual}`,
+    message: `expected ${inspect(expected)}, actual ${inspect(this.actual)}`,
   };
 }
 
@@ -22,6 +23,6 @@ export function toBeNull(this: Context): MatchResult {
 
   return {
     pass,
-    message: `expected null, actual ${Deno.inspect(actual)}`,
+    message: `expected null, actual ${inspect(actual)}`,
   };
 }
