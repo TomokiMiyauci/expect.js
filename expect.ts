@@ -80,16 +80,10 @@ function run(
     return matchResult;
   }
 
-  function match(actual: unknown) {
+  function match(actual: unknown): MatchResult | Promise<MatchResult> {
     return context.matcher.fn.bind({ actual })(
       ...context.matcher.args,
     );
-  }
-
-  function throwOrThrough(result: MatchResult): void | never {
-    if (!result.pass) {
-      throw Error(result.message);
-    }
   }
 
   if (awaitable) {
@@ -107,4 +101,10 @@ function run(
   const result = applyResultHook(matchResult);
 
   throwOrThrough(result);
+}
+
+function throwOrThrough(result: MatchResult): void | never {
+  if (!result.pass) {
+    throw Error(result.message);
+  }
 }
