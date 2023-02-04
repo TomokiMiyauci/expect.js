@@ -4,7 +4,7 @@ import type {
   Matchers,
   MatchResult,
   OnActual,
-  OnResult,
+  OnExpected,
 } from "./types.ts";
 import { not, rejects, resolves } from "./hooks.ts";
 import { Voidify } from "./utils.ts";
@@ -64,14 +64,15 @@ function run(
     Boolean,
   ) as OnActual[];
 
-  const onResults = context.hooks.map(({ onResult }) => onResult).filter(
-    Boolean,
-  ) as OnResult[];
+  const onExpectedList = context.hooks.map(({ onExpected }) => onExpected)
+    .filter(
+      Boolean,
+    ) as OnExpected[];
 
   const awaitable = context.hooks.some((hook) => hook.await);
 
   function applyResultHook(result: MatchResult) {
-    const matchResult = onResults.reduce<MatchResult>((acc, cur) => {
+    const matchResult = onExpectedList.reduce<MatchResult>((acc, cur) => {
       const result = cur(acc);
 
       return { ...acc, ...result };
@@ -98,8 +99,12 @@ function run(
   }
 
   const matchResult = match(actual);
-  const result = applyResultHook(matchResult);
 
+  if (matchResult instanceof Promise) {
+    return matchResult.then(applyResultHook).then(throwOrThrough);
+  }
+
+  const result = applyResultHook(matchResult);
   throwOrThrough(result);
 }
 

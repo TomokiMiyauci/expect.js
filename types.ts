@@ -2,7 +2,7 @@ export interface OnActual {
   (actual: unknown): unknown;
 }
 
-export interface OnResult {
+export interface OnExpected {
   (result: MatchResult): Partial<MatchResult>;
 }
 
@@ -18,6 +18,7 @@ export interface Matchers {
 }
 
 export interface MatchResult {
+  /** Expect message. */
   readonly message: string;
 
   /** Whether the match result is pass or not. */
@@ -48,5 +49,10 @@ export interface Hook {
   onActual?: OnActual;
 
   /** Call on after matcher matching. */
-  onResult?: OnResult;
+  onExpected?: OnExpected;
+}
+
+/** Expect API. */
+export interface Expect<T> {
+  (actual: unknown): T;
 }

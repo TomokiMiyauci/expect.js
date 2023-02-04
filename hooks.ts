@@ -1,3 +1,4 @@
+import { inspect } from "./utils.ts";
 import type { Hook } from "./types.ts";
 
 export const not: Hook = {
@@ -5,10 +6,8 @@ export const not: Hook = {
 
   await: false,
 
-  onResult: (result) => {
-    return {
-      pass: !result.pass,
-    };
+  onExpected: (result) => {
+    return { pass: !result.pass };
   },
 };
 
@@ -32,7 +31,7 @@ export const rejects: Hook = {
       const result = await actual;
 
       throw Error(
-        `Promise did not reject. resolved to ${Deno.inspect(result)}`,
+        `Promise did not reject. resolved to ${inspect(result)}`,
       );
     } catch (e) {
       return e;
